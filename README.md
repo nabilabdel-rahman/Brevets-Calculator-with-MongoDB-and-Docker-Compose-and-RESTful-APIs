@@ -1,72 +1,21 @@
-# UOCIS322 - Project 6 #
-Brevet time calculator with MongoDB, and a RESTful API!
+# UOCIS322 - Project 5 #
 
-Read about MongoEngine and Flask-RESTful before you start: [http://docs.mongoengine.org/](http://docs.mongoengine.org/), [https://flask-restful.readthedocs.io/en/latest/](https://flask-restful.readthedocs.io/en/latest/).
+Author: Nabil Abdel-Rahman
 
-## Before you begin
-You *HAVE TO* copy `.env-example` into `.env` and specify your container port numbers there!
-Note that the default values (5000 and 5000) will work!
+Contact: nabilabdel-rahman@outlook.com
 
-*DO NOT PLACE LOCAL PORTS IN YOUR COMPOSE FILE!*
+This project consists of a web application that is based on RUSA's online calculator. The algorithm for calculating controle times is described here https://rusa.org/pages/acp-brevet-control-times-calculator. Additional background information is given here https://rusa.org/pages/rulesForRiders. The description is ambiguous, but the examples help. Part of finishing this project is clarifying anything that is not clear about the requirements, and documenting it clearly.
 
-## Overview
+We are essentially replacing the calculator here https://rusa.org/octime_acp.html. We can also use that calculator to clarify requirements and develop test data.
 
-You will reuse your code from Project 5, which already has two services:
+The brevet calculator also has a submit button and a display button. When the submit button is pressed, all data entered is stored in a database in Mongo. If new edits are made and the user presses submit again, the old information in the database becomes overriden with whatever is currently entered. When the display button is hit, all information is cleared and replaced with the most recent information stored in the database. The database contains the brevet distance, the beginning date and time, and the distance, opening time, and closing time of each checkpoint.
 
-* Brevets
-	* The entire web service
-* MongoDB
+We run the calculator using Docker Compose and Flask to load the page onto our machine locally. In a Linux environment, use the command "docker compose up" to spon everything up. A YAML is provided in the folder in order to run the program. Make sure to adjust the YAML file accordingly, such as the port numbers to which your machine binds to. Further, all page templates are provided in the folder "templates". Lastly, a skeleton to create your credentials page to run the program is provided as well. 
 
-For this project, you will re-organize `Brevets` into two separate services:
+The frontend, calc.html, contains a javascript which allows for AJAX requests to the flask application. The file acp_times.py computes the calculations and returns it back to the flask application, which processes the data and returns the date and time for each interval back to calc.html, which then updates the page accordingly.
 
-* Web (Front-end)
-	* Time calculator (basically everything you had in project 4)
-* API (Back-end)
-	* A RESTful service to expose/store structured data in MongoDB.
+When the submit button is pressed, the frontend gathers all information entered on the page and stores it in a dictionary, which gets sent to flask_brevets where it is stored in a dictionary. When the display button is pressed, the frontend calls the back end to retrieve the dicitonary from the database and then parses through the dictionary to enter the respective fields with their values.
 
-## Tasks
+A file called test_flask_brevets.py is provided along with test_acp_times.py to hold test cases to ensure that the calculations in acp_times.py are correct and information stored and retrieved in Mongo is correct. Some tests contains variables which can be manipulated to ensure different scenarios are correct. To run the tests, in your terminal, make sure your current directory is "brevets" and run the command "nosetests tests".
 
-* Implement a RESTful API in `api/`:
-	* Write a data schema using MongoEngine for Checkpoints and Brevets:
-		* `Checkpoint`:
-			* `distance`: float, required, (checkpoint distance in kilometers), 
-			* `location`: string, optional, (checkpoint location name), 
-			* `open_time`: datetime, required, (checkpoint opening time), 
-			* `close_time`: datetime, required, (checkpoint closing time).
-		* `Brevet`:
-			* `length`: float, required, (brevet distance in kilometers),
-			* `start_time`: datetime, required, (brevet start time),
-			* `checkpoints`: list of `Checkpoint`s, required, (checkpoints).
-	* Using the schema, build a RESTful API with the resource `/brevets/`:
-		* GET `http://API:PORT/api/brevets` should display all brevets stored in the database.
-		* GET `http://API:PORT/api/brevet/ID` should display brevet with id `ID`.
-		* POST `http://API:PORT/api/brevets` should insert brevet object in request into the database.
-		* DELETE `http://API:PORT/api/brevet/ID` should delete brevet with id `ID`.
-		* PUT `http://API:PORT/api/brevet/ID` should update brevet with id `ID` with object in request.
-
-* Copy over `brevets/` from your completed project 5.
-	* Replace every database related code in `brevets/` with calls to the new API.
-		* Remember: AutoGrader will ensure there is NO CONNECTION between `brevets` and `db` services. `brevets` should only operate through `api` and still function the way it did in project 5.
-		* Hint: Submit should send a POST request to the API to insert, Display should send a GET request, and display the last entry.
-	* Remove `config.py` and adjust `flask_brevets.py` to use the `PORT` and `DEBUG` values specified in env variables (see `docker-compose.yml`).
-
-* Update README.md with API documentation added.
-
-As always you'll turn in your `credentials.ini` through Canvas.
-
-## Grading Rubric
-
-* If your code works as expected: 100 points. This includes:
-    * API routes as outlined above function exactly the way expected,
-    * Web application works as expected in project 5,
-    * README is updated with the necessary details.
-
-* If the front-end service does not work, 20 points will be docked.
-
-* For each of the 5 requests that do not work, 15 points will be docked.
-
-* If none of the above work, 5 points will be assigned assuming project builds and runs, and `README` is updated. Otherwise, 0 will be assigned.
-
-## Authors
-
-Michal Young, Ram Durairajan. Updated by Ali Hassani.
+Make sure to run the command "docker compose down --rmi local" to stop the program and delete all local images when finished running the program.
