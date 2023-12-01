@@ -6,46 +6,28 @@ Replacement for RUSA ACP brevet time calculator
 
 import os
 import logging
+import requests
 
 import flask
 from flask import request
 import arrow  # Replacement for datetime, based on moment.js
 import acp_times  # Brevet time calculations
-import config
 
-from pymongo import MongoClient
 
-###
-# Globals
-###
+
 app = flask.Flask(__name__)
-CONFIG = config.configuration()
+app.debug = True if "DEBUG" not in os.environ else os.environ["DEBUG"]
+port_num = True if "PORT" not in os.environ else os.environ["PORT"]
+app.logger.setLevel(logging.DEBUG)
 
-
-# Set up MongoDB connection
-client = MongoClient('mongodb://' + os.environ['MONGODB_HOSTNAME'], 27017)
-
-# Use database "brevets"
-db = client.brevets
-
-# Use collection "lists" in the databse
-collection = db.lists
-
-###
-# Pages
-###
-
-
-@app.route("/")
-@app.route("/index")
-def index():
-    app.logger.debug("Main page entry")
-    return flask.render_template('calc.html')
-
+API_ADDR = os.environ["API_ADDR"]
+API_PORT = os.environ["API_PORT"]
+API_URL = f"http://{API_ADDR}:{API_PORT}/api/"
 
 def get_brevets():
     """
-    Obtains the newest document in the "lists" collection in database "todo".
+    Obtains the newest document in the "lists" collection in database
+    by calling the RESTful API.
 
     Returns title (string) and items (list of dictionaries) as a tuple.
     """
@@ -53,36 +35,30 @@ def get_brevets():
     # Sort by primary key in descending order and limit to 1 document (row)
     # This will translate into finding the newest inserted document.
 
-    lists = collection.find().sort("_id", -1).limit(1)
+    lists = requests.get(f"{API_URL}/brevets").json()
 
-    # lists is a PyMongo cursor, which acts like a pointer.
-    # We need to iterate through it, even if we know it has only one entry:
-    for todo_list in lists:
-        # We store all of our lists as documents with two fields:
-        ## title: string # title of our to-do list
-        ## items: list   # list of items:
-
-        ### every item has three fields:
-        #### date: string   # date
-        #### brevet: int  #brevet
-        #### items: list  #km, open, and close
-        return todo_list["date"], todo_list["brevet"], todo_list["items"]
+    # lists should be a list of dictionaries.
+    # we just need the last one:
+    brevet = lists[-1]
+    return brevet["length"], brevet["start_time"], brevet["checkpoints"]
 
 
-def submit_brevets(date, brevet, items):
+def submit_brevets(start_time, length, checkpoints):
     """
-    Inserts a new to-do list into the database "todo", under the collection "lists".
+    Inserts a new to-do list into the database by calling the API.
     
     Inputs a title (string) and items (list of dictionaries)
-
-    Returns the unique ID assigned to the document by mongo (primary key.)
     """
-    output = collection.insert_one({
-        "date": date,
-        "brevet": brevet,
-        "items": items})
-    _id = output.inserted_id # this is how you obtain the primary key (_id) mongo assigns to your inserted document.
-    return str(_id)
+    _id = requests.post(f"{API_URL}brevets", json={"length": length, "start_time": start_time, "checkpoints": checkpoints}).json()
+    return _id
+
+
+
+@app.route("/")
+@app.route("/index")
+def index():
+    app.logger.debug("Main page entry")
+    return flask.render_template('calc.html')
 
 
 @app.route("/submit", methods=["POST"])
@@ -184,10 +160,5 @@ def _calc_times():
 
 #############
 
-app.debug = CONFIG.DEBUG
-if app.debug:
-    app.logger.setLevel(logging.DEBUG)
-
 if __name__ == "__main__":
-    print("Opening for global access on port {}".format(CONFIG.PORT))
-    app.run(port=CONFIG.PORT, host="0.0.0.0")
+    app.run(port=port_num, host="0.0.0.0")
