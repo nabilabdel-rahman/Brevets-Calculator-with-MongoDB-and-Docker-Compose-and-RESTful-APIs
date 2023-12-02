@@ -139,11 +139,13 @@
                             var km = item.find("input[name='km']").val();
                             var open = item.find("input[name='open']").val();
                             var close = item.find("input[name='close']").val();
+                            var location = item.find("input[name='location']").val();
                             // If not empty, append to our list.
                             if (km) {
                                 // Construct a dictionary
                                 item_json = {
-                                    "km": km, 
+                                    "km": km,
+                                    "location": location, 
                                     "open": open,
                                     "close": close
                                 }
@@ -217,11 +219,13 @@
                                       var litem = $(this); // This is our row
                                       // Clear existing values
                                       litem.find("input[name='km']").val('');
+                                      litem.find("input[name='location']").val('');
                                       litem.find("input[name='open']").val('');
                                       litem.find("input[name='close']").val('');
                                       // Check if we're already done?
                                       if (index < num_items) {
                                           litem.find("input[name='km']").val(items[index].km);
+                                          litem.find("input[name='location']").val(items[index].location);
                                           litem.find("input[name='open']").val(items[index].open);
                                           litem.find("input[name='close']").val(items[index].close);
                                       }
