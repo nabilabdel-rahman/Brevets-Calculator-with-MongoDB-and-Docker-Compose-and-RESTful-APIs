@@ -1,4 +1,4 @@
-# UOCIS322 - Project 5 #
+# UOCIS322 - Project 6 #
 
 Author: Nabil Abdel-Rahman
 
@@ -15,6 +15,8 @@ We run the calculator using Docker Compose and Flask to load the page onto our m
 The frontend, calc.html, contains a javascript which allows for AJAX requests to the flask application. The file acp_times.py computes the calculations and returns it back to the flask application, which processes the data and returns the date and time for each interval back to calc.html, which then updates the page accordingly.
 
 When the submit button is pressed, the frontend gathers all information entered on the page and stores it in a dictionary, which gets sent to flask_brevets where it is stored in a dictionary. When the display button is pressed, the frontend calls the back end to retrieve the dicitonary from the database and then parses through the dictionary to enter the respective fields with their values.
+
+The data is stored in and retrieved form the database through a RESTful API implementation. A GET and POST method is implemented so that checkpoints in a given brevet can be read and checkpoints can be written and/or updated in a brevet respectively. It also includes a GET, PUT, and DELETE method so that any brevet stored can be read from the database, a brevet can be inserted into the database, and a brevet can be deleted from the database, respectively.
 
 A file called test_flask_brevets.py is provided along with test_acp_times.py to hold test cases to ensure that the calculations in acp_times.py are correct and information stored and retrieved in Mongo is correct. Some tests contains variables which can be manipulated to ensure different scenarios are correct. To run the tests, in your terminal, make sure your current directory is "brevets" and run the command "nosetests tests".
 
