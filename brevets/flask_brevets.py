@@ -35,21 +35,21 @@ def get_brevets():
     # Sort by primary key in descending order and limit to 1 document (row)
     # This will translate into finding the newest inserted document.
 
-    lists = requests.get(f"{API_URL}/brevets").json()
+    lists = requests.get(f"{API_URL}brevets").json()
 
     # lists should be a list of dictionaries.
     # we just need the last one:
     brevet = lists[-1]
-    return brevet["length"], brevet["start_time"], brevet["checkpoints"]
+    return brevet["date"], brevet["brevet"], brevet["items"]
 
 
-def submit_brevets(start_time, length, checkpoints):
+def submit_brevets(date, brevet, items):
     """
     Inserts a new to-do list into the database by calling the API.
     
     Inputs a title (string) and items (list of dictionaries)
     """
-    _id = requests.post(f"{API_URL}brevets", json={"length": length, "start_time": start_time, "checkpoints": checkpoints}).json()
+    _id = requests.post(f"{API_URL}brevets", json={"date": date, "brevet": brevet, "items": items}).json()
     return _id
 
 
@@ -80,8 +80,9 @@ def insert():
         date = input_json["date"] # Should be a string
         brevet = input_json["brevet"]
         items = input_json["items"] # Should be a list of dictionaries
-
+        
         brevets_id = submit_brevets(date, brevet, items)
+        app.logger.debug(brevets_id)
 
         return flask.jsonify(result={},
                         message="Inserted!", 
