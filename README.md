@@ -1,4 +1,4 @@
-# UOCIS322 - Project 6 #
+# Brevets Calculator with MongoDB and Docker Compose and RESTful APIs
 
 Author: Nabil Abdel-Rahman
 
